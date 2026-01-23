@@ -1,12 +1,19 @@
 "use client";
+
 import { useState } from "react";
-import { ParcelMap } from "@/components/ParcelMap";
+import dynamic from "next/dynamic";
 import { SearchBar } from "@/components/SearchBar";
 import { ParcelDetails } from "@/components/ParcelDetails";
 import { StatsSummary } from "@/components/StatsSummary";
 import { Legend } from "@/components/Legend";
 import { ParcelMatchResult } from "@/lib/matching";
 import { MapPin, Database, FileCheck } from "lucide-react";
+
+// ✅ Correct dynamic import (no destructuring)
+const ParcelMap = dynamic(
+  () => import("@/components/ParcelMap"),
+  { ssr: false }
+);
 
 const Home = () => {
   // State for currently searched plot ID

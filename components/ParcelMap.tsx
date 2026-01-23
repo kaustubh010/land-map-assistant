@@ -9,7 +9,7 @@ interface ParcelMapProps {
   onParcelClick: (result: ParcelMatchResult) => void;
 }
 
-export function ParcelMap({ searchedPlotId, onParcelClick }: ParcelMapProps) {
+export default function ParcelMap({ searchedPlotId, onParcelClick }: ParcelMapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const geoJsonLayerRef = useRef<L.GeoJSON | null>(null);
