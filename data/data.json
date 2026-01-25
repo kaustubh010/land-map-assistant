@@ -1,6 +1,6 @@
 {
   "type": "FeatureCollection",
-  "name": "data",
+  "name": "Churu_Plots",
   "crs": {
     "type": "name",
     "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" }
@@ -9,9 +9,10 @@
     {
       "type": "Feature",
       "properties": {
-        "plot_id": 1,
+        "fid": 1,
         "owner_name_map": "Ramesh",
-        "area_map": 8788.0
+        "area_map": 8788.0,
+        "plot_id": "1"
       },
       "geometry": {
         "type": "Polygon",
@@ -29,9 +30,10 @@
     {
       "type": "Feature",
       "properties": {
-        "plot_id": 2,
+        "fid": 2,
         "owner_name_map": "rahul",
-        "area_map": 78787.0
+        "area_map": 78787.0,
+        "plot_id": "2"
       },
       "geometry": {
         "type": "Polygon",
@@ -49,9 +51,10 @@
     {
       "type": "Feature",
       "properties": {
-        "plot_id": 3,
+        "fid": 3,
         "owner_name_map": "rakesh",
-        "area_map": 7878.0
+        "area_map": 7878.0,
+        "plot_id": "3"
       },
       "geometry": {
         "type": "Polygon",
@@ -69,9 +72,10 @@
     {
       "type": "Feature",
       "properties": {
-        "plot_id": 4,
+        "fid": 4,
         "owner_name_map": "saurav",
-        "area_map": 98000.0
+        "area_map": 98000.0,
+        "plot_id": "4"
       },
       "geometry": {
         "type": "Polygon",
@@ -95,9 +99,10 @@
     {
       "type": "Feature",
       "properties": {
-        "plot_id": 5,
+        "fid": 5,
         "owner_name_map": "hello",
-        "area_map": 7887.0
+        "area_map": 7887.0,
+        "plot_id": "5"
       },
       "geometry": {
         "type": "Polygon",
@@ -115,9 +120,10 @@
     {
       "type": "Feature",
       "properties": {
-        "plot_id": 6,
+        "fid": 6,
         "owner_name_map": "ha",
-        "area_map": 78787.0
+        "area_map": 78787.0,
+        "plot_id": "6"
       },
       "geometry": {
         "type": "Polygon",
@@ -137,9 +143,10 @@
     {
       "type": "Feature",
       "properties": {
-        "plot_id": 7,
+        "fid": 7,
         "owner_name_map": "hurr",
-        "area_map": 78487.0
+        "area_map": 78487.0,
+        "plot_id": "7"
       },
       "geometry": {
         "type": "Polygon",
@@ -157,9 +164,10 @@
     {
       "type": "Feature",
       "properties": {
-        "plot_id": 8,
+        "fid": 8,
         "owner_name_map": "hfdhfdh",
-        "area_map": 787878.0
+        "area_map": 787878.0,
+        "plot_id": "8"
       },
       "geometry": {
         "type": "Polygon",
@@ -179,9 +187,10 @@
     {
       "type": "Feature",
       "properties": {
-        "plot_id": 9,
+        "fid": 9,
         "owner_name_map": "djkfdjfkj",
-        "area_map": 87887.0
+        "area_map": 87887.0,
+        "plot_id": "9"
       },
       "geometry": {
         "type": "Polygon",
@@ -199,9 +208,10 @@
     {
       "type": "Feature",
       "properties": {
-        "plot_id": 10,
+        "fid": 10,
         "owner_name_map": "kdjfkdjf",
-        "area_map": 84848.0
+        "area_map": 84848.0,
+        "plot_id": "10"
       },
       "geometry": {
         "type": "Polygon",
@@ -219,9 +229,10 @@
     {
       "type": "Feature",
       "properties": {
-        "plot_id": 11,
+        "fid": 11,
         "owner_name_map": "hjddhfkj",
-        "area_map": 48485.0
+        "area_map": 48485.0,
+        "plot_id": "11"
       },
       "geometry": {
         "type": "Polygon",
@@ -239,9 +250,10 @@
     {
       "type": "Feature",
       "properties": {
-        "plot_id": 12,
+        "fid": 12,
         "owner_name_map": "dfdfd",
-        "area_map": 4848.0
+        "area_map": 4848.0,
+        "plot_id": "12"
       },
       "geometry": {
         "type": "Polygon",
@@ -259,9 +271,10 @@
     {
       "type": "Feature",
       "properties": {
-        "plot_id": 13,
-        "owner_name_map": "dgedg",
-        "area_map": 8535343.0
+        "fid": 13,
+        "owner_name_map": "Chandrashekar Y",
+        "area_map": 1.75,
+        "plot_id": "13"
       },
       "geometry": {
         "type": "Polygon",
@@ -282,9 +295,10 @@
     {
       "type": "Feature",
       "properties": {
-        "plot_id": 14,
-        "owner_name_map": "dfdfdf",
-        "area_map": 84848.0
+        "fid": 14,
+        "owner_name_map": "Ningappa G",
+        "area_map": 2.45,
+        "plot_id": "14"
       },
       "geometry": {
         "type": "Polygon",
@@ -302,9 +316,10 @@
     {
       "type": "Feature",
       "properties": {
-        "plot_id": 15,
+        "fid": 15,
         "owner_name_map": "fedfghh",
-        "area_map": 6346586.0
+        "area_map": 6346586.0,
+        "plot_id": "15"
       },
       "geometry": {
         "type": "Polygon",
@@ -322,9 +337,10 @@
     {
       "type": "Feature",
       "properties": {
-        "plot_id": 16,
-        "owner_name_map": "ghjkl;'",
-        "area_map": null
+        "fid": 16,
+        "owner_name_map": "Girish N",
+        "area_map": 1.30,
+        "plot_id": "16"
       },
       "geometry": {
         "type": "Polygon",
@@ -343,9 +359,10 @@
     {
       "type": "Feature",
       "properties": {
-        "plot_id": 17,
+        "fid": 17,
         "owner_name_map": "fghjkl",
-        "area_map": 65.0
+        "area_map": 65.0,
+        "plot_id": "17"
       },
       "geometry": {
         "type": "Polygon",
@@ -363,9 +380,10 @@
     {
       "type": "Feature",
       "properties": {
-        "plot_id": 18,
+        "fid": 18,
         "owner_name_map": "FDGHNM",
-        "area_map": 3456.0
+        "area_map": 3456.0,
+        "plot_id": "18"
       },
       "geometry": {
         "type": "Polygon",
@@ -384,9 +402,10 @@
     {
       "type": "Feature",
       "properties": {
-        "plot_id": 19,
+        "fid": 19,
         "owner_name_map": "ERTHYJ",
-        "area_map": 34567.0
+        "area_map": 34567.0,
+        "plot_id": "19"
       },
       "geometry": {
         "type": "Polygon",
@@ -404,9 +423,10 @@
     {
       "type": "Feature",
       "properties": {
-        "plot_id": 20,
+        "fid": 20,
         "owner_name_map": "8585",
-        "area_map": 858.0
+        "area_map": 858.0,
+        "plot_id": "20"
       },
       "geometry": {
         "type": "Polygon",
@@ -424,9 +444,10 @@
     {
       "type": "Feature",
       "properties": {
-        "plot_id": 21,
+        "fid": 21,
         "owner_name_map": "58",
-        "area_map": 666363.0
+        "area_map": 666363.0,
+        "plot_id": "21"
       },
       "geometry": {
         "type": "Polygon",
@@ -447,9 +468,10 @@
     {
       "type": "Feature",
       "properties": {
-        "plot_id": 22,
+        "fid": 22,
         "owner_name_map": "6556635",
-        "area_map": 858755.0
+        "area_map": 858755.0,
+        "plot_id": "22"
       },
       "geometry": {
         "type": "Polygon",
@@ -472,9 +494,10 @@
     {
       "type": "Feature",
       "properties": {
-        "plot_id": 23,
+        "fid": 23,
         "owner_name_map": "523685685",
-        "area_map": 8568585685.0
+        "area_map": 8568585685.0,
+        "plot_id": "23"
       },
       "geometry": {
         "type": "Polygon",
@@ -492,9 +515,10 @@
     {
       "type": "Feature",
       "properties": {
-        "plot_id": 24,
-        "owner_name_map": "85448548545",
-        "area_map": 48584485.0
+        "fid": 24,
+        "owner_name_map": "Naga Y",
+        "area_map": 1.75,
+        "plot_id": "24"
       },
       "geometry": {
         "type": "Polygon",

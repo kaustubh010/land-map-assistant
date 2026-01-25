@@ -23,7 +23,7 @@ const AREA_TOLERANCE_PERCENT = 5;
  * Calculate percentage difference between two areas
  * Returns absolute percentage difference
  */
-export function calculateAreaDifference(areaMap: number, areaRecord: number): number {
+function calculateAreaDifference(areaMap: number, areaRecord: number): number {
   const avgArea = (areaMap + areaRecord) / 2;
   return Math.abs((areaMap - areaRecord) / avgArea) * 100;
 }
