@@ -59,6 +59,24 @@ export default function ParcelMap({ searchedPlotId, onParcelClick }: ParcelMapPr
     };
   }, []);
 
+  useEffect(() => {
+  if (!mapRef.current) return;
+
+  const allCoords: L.LatLngExpression[] = [];
+
+  parcelsGeoJSON.features.forEach(feature => {
+    if (feature.geometry.type === "Polygon") {
+      const coords = feature.geometry.coordinates[0] as [number, number][];
+      coords.forEach(([lng, lat]) => allCoords.push([lat, lng]));
+    }
+  });
+
+  if (allCoords.length) {
+    mapRef.current.fitBounds(L.latLngBounds(allCoords), { padding: [50, 50] });
+  }
+}, []);
+
+
   // Add GeoJSON layer and handle updates
   useEffect(() => {
     if (!mapRef.current) return;
@@ -83,7 +101,7 @@ export default function ParcelMap({ searchedPlotId, onParcelClick }: ParcelMapPr
           <div style="padding: 8px; min-width: 200px;">
             <h3 style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">${props.plot_id}</h3>
             <div style="font-size: 14px;">
-              <p><strong>Area (Map):</strong> ${props.area_map.toFixed(2)} ha</p>
+              ${(Number(props.area_map) / 10000).toFixed(2)} ha
               ${matchResult.area_record !== undefined 
                 ? `<p><strong>Area (Records):</strong> ${matchResult.area_record.toFixed(2)} ha</p>` 
                 : '<p style="color: #6b7280;">No record found</p>'

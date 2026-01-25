@@ -58,7 +58,7 @@ export function ParcelDetails({ parcel }: ParcelDetailsProps) {
           <div className="bg-muted/50 rounded-lg p-3 space-y-1">
             <div className="flex justify-between text-sm">
               <span>Area:</span>
-              <span className="font-medium">{parcel.area_map.toFixed(2)} hectares</span>
+              <span className="font-medium">{Number(parcel.area_map).toFixed(2)} hectares</span>
             </div>
             {parcel.owner_name_map && (
               <div className="flex justify-between text-sm">
