@@ -9,19 +9,7 @@ export interface ParcelProperties {
   owner_name_map?: string;
 }
 
-export interface ParcelGeoJSON {
-  type: "FeatureCollection";
-  features: Array<{
-    type: "Feature";
-    properties: ParcelProperties;
-    geometry: {
-      type: "Polygon";
-      coordinates: number[][][];
-    };
-  }>;
-}
-
-export const parcelsGeoJSON: ParcelGeoJSON = {
+export const parcelsGeoJSON = {
   type: "FeatureCollection",
   name: "fdfddf",
   crs: { type: "name", properties: { name: "urn:ogc:def:crs:OGC:1.3:CRS84" } },
