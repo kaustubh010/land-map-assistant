@@ -31,12 +31,14 @@ function calculateAreaDifference(areaMap: number, areaRecord: number): number {
 /**
  * Match a single parcel from map data against land records
  * Returns match result with status and any discrepancy details
+ * @param parcelProps - Properties from the map parcel
+ * @param records - Optional custom records array (defaults to landRecords)
  */
-export function matchParcel(parcelProps: ParcelProperties): ParcelMatchResult {
+export function matchParcel(parcelProps: ParcelProperties, records: LandRecord[] = landRecords): ParcelMatchResult {
   const { plot_id, area_map, owner_name_map } = parcelProps;
   
   // Find matching record by plot_id
-  const record = landRecords.find(r => r.plot_id === plot_id);
+  const record = records.find(r => r.plot_id === plot_id);
   
   // Case 1: No matching record found - Missing
   if (!record) {
@@ -107,7 +109,6 @@ export function getStatusLabel(status: MatchStatus): string {
 
 /**
  * Find records that exist in CSV but not in map data
+ * @param mapPlotIds - Array of plot IDs from the map
+ * @param records - Optional custom records array (defaults to landRecords)
  */
-export function findOrphanRecords(mapPlotIds: string[]): LandRecord[] {
-  return landRecords.filter(record => !mapPlotIds.includes(record.plot_id));
-}

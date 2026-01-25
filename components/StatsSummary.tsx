@@ -1,21 +1,24 @@
 import { useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { parcelsGeoJSON, ParcelProperties } from "@/data/parcels";
-import { matchParcel, findOrphanRecords } from "@/lib/matching";
-import { CheckCircle, AlertTriangle, HelpCircle, FileWarning } from "lucide-react";
+import { matchParcel } from "@/lib/matching";
+import { LandRecord } from "@/data/records";
+import { CheckCircle, AlertTriangle, HelpCircle } from "lucide-react";
 
-export function StatsSummary() {
+interface StatsSummaryProps {
+  records: LandRecord[];
+}
+
+export function StatsSummary({ records }: StatsSummaryProps) {
   const stats = useMemo(() => {
     let matched = 0;
     let mismatch = 0;
     let missing = 0;
-    const plotIds: string[] = [];
     
     // Analyze each parcel from map data
     parcelsGeoJSON.features.forEach(feature => {
       const props = feature.properties as ParcelProperties;
-      plotIds.push(props.plot_id);
-      const result = matchParcel(props);
+      const result = matchParcel(props, records);
       
       switch (result.status) {
         case "matched":
@@ -30,17 +33,13 @@ export function StatsSummary() {
       }
     });
     
-    // Find orphan records (in CSV but not in map)
-    const orphanRecords = findOrphanRecords(plotIds);
-    
     return {
       total: parcelsGeoJSON.features.length,
       matched,
       mismatch,
-      missing,
-      orphans: orphanRecords.length
+      missing
     };
-  }, []);
+  }, [records]);
   
   return (
     <div className="grid grid-cols-2 gap-3">
@@ -68,25 +67,13 @@ export function StatsSummary() {
         </CardContent>
       </Card>
       
-      <Card className="bg-status-missing/10 border-status-missing/30">
+      <Card className="col-span-2 bg-status-missing/10 border-status-missing/30">
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
             <HelpCircle className="h-8 w-8 text-status-missing" />
             <div>
               <p className="text-2xl font-bold text-status-missing">{stats.missing}</p>
               <p className="text-xs text-muted-foreground">Missing Record</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Card className="bg-amber-500/10 border-amber-500/30">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-3">
-            <FileWarning className="h-8 w-8 text-amber-500" />
-            <div>
-              <p className="text-2xl font-bold text-amber-500">{stats.orphans}</p>
-              <p className="text-xs text-muted-foreground">Orphan Records</p>
             </div>
           </div>
         </CardContent>

@@ -3,13 +3,15 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { parcelsGeoJSON, ParcelProperties } from "@/data/parcels";
 import { matchParcel, getStatusColor, getStatusLabel, ParcelMatchResult } from "@/lib/matching";
+import { LandRecord } from "@/data/records";
 
 interface ParcelMapProps {
   searchedPlotId: string | null;
   onParcelClick: (result: ParcelMatchResult) => void;
+  records: LandRecord[];
 }
 
-export default function ParcelMap({ searchedPlotId, onParcelClick }: ParcelMapProps) {
+export default function ParcelMap({ searchedPlotId, onParcelClick,records }: ParcelMapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const geoJsonLayerRef = useRef<L.GeoJSON | null>(null);
@@ -22,7 +24,7 @@ export default function ParcelMap({ searchedPlotId, onParcelClick }: ParcelMapPr
     if (!feature?.properties) return {};
     
     const props = feature.properties as ParcelProperties;
-    const matchResult = matchParcel(props);
+    const matchResult = matchParcel(props, records);
     const color = getStatusColor(matchResult.status);
     
     return {
@@ -32,7 +34,7 @@ export default function ParcelMap({ searchedPlotId, onParcelClick }: ParcelMapPr
       weight: isSearched ? 4 : 2,
       opacity: 1
     };
-  }, []);
+  }, [records]);
 
   // Initialize the map
   useEffect(() => {
@@ -94,14 +96,14 @@ export default function ParcelMap({ searchedPlotId, onParcelClick }: ParcelMapPr
       },
       onEachFeature: (feature, layer) => {
         const props = feature.properties as ParcelProperties;
-        const matchResult = matchParcel(props);
+        const matchResult = matchParcel(props, records);
 
         // Create popup content
         const popupContent = `
           <div style="padding: 8px; min-width: 200px;">
             <h3 style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">${props.plot_id}</h3>
             <div style="font-size: 14px;">
-              ${(Number(props.area_map) / 10000).toFixed(2)} ha
+              <p><strong>Area (Map):</strong> ${Number(props.area_map).toFixed(2)} ha</p>
               ${matchResult.area_record !== undefined 
                 ? `<p><strong>Area (Records):</strong> ${matchResult.area_record.toFixed(2)} ha</p>` 
                 : '<p style="color: #6b7280;">No record found</p>'
@@ -146,7 +148,7 @@ export default function ParcelMap({ searchedPlotId, onParcelClick }: ParcelMapPr
     geoJsonLayer.addTo(mapRef.current);
     geoJsonLayerRef.current = geoJsonLayer;
 
-  }, [searchedPlotId, onParcelClick, getFeatureStyle]);
+  }, [searchedPlotId, onParcelClick, getFeatureStyle, records]);
 
   // Center on searched parcel
   useEffect(() => {
@@ -167,7 +169,7 @@ export default function ParcelMap({ searchedPlotId, onParcelClick }: ParcelMapPr
   return (
     <div 
       ref={mapContainerRef} 
-      className="h-full w-full rounded-lg"
+      className="h-full w-full rounded-lg z-0"
       style={{ minHeight: "400px" }}
     />
   );
