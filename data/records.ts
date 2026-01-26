@@ -118,7 +118,7 @@ export const landRecords: LandRecord[] = [
   {
     plot_id: "43",
     owner_name: "Naga Y",
-    area_record: 8585
+    area_record: 2.75
   },
   {
     plot_id: "44",
@@ -158,12 +158,12 @@ export const landRecords: LandRecord[] = [
   {
     plot_id: "50",
     owner_name: "Naga Y",
-    area_record: 7457
+    area_record: 1.26
   },
   {
     plot_id: "55",
     owner_name: "Rakesh Kumar",
-    area_record: 5584
+    area_record: 2.75
   },
   {
     plot_id: "24",

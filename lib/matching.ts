@@ -101,7 +101,7 @@ export function getStatusLabel(status: MatchStatus): string {
     case "matched":
       return "Matched";
     case "mismatch":
-      return "Area Mismatch";
+      return "Mismatch";
     case "missing":
       return "Missing Record";
   }

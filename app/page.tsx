@@ -7,10 +7,13 @@ import { ParcelDetails } from "@/components/ParcelDetails";
 import { StatsSummary } from "@/components/StatsSummary";
 import { Legend } from "@/components/Legend";
 import { ParcelMatchResult } from "@/lib/matching";
-import { MapPin, Database, FileCheck } from "lucide-react";
+import { MapPin, Database, FileCheck, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 import { ParcelEditDialog } from "@/components/ParcelEditDialog";
 import { landRecords, LandRecord } from "@/data/records";
+import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { useRouter } from "next/navigation";
 
 // ✅ Correct dynamic import (no destructuring)
 const ParcelMap = dynamic(() => import("@/components/ParcelMap"), {
@@ -18,6 +21,7 @@ const ParcelMap = dynamic(() => import("@/components/ParcelMap"), {
 });
 
 const Home = () => {
+  const router = useRouter();
   // State for currently searched plot ID
   const [searchedPlotId, setSearchedPlotId] = useState<string | null>(null);
   // State for selected parcel details
@@ -88,33 +92,16 @@ const Home = () => {
     [],
   );
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-card border-b border-border px-6 py-4">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary text-primary-foreground">
-            <MapPin className="h-5 w-5" />
-          </div>
-          <div>
-            <h1 className="text-xl font-semibold text-foreground">
-              Land Record Digitization Assistant
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Village Parcel Verification System
-            </p>
-          </div>
-        </div>
-      </header>
-
+ return (
+    <div className="bg-background">
       {/* Main Content */}
-      <main className="flex flex-col lg:flex-row h-[calc(100vh-73px)]">
+      <main className="flex flex-col lg:flex-row h-[calc(100vh-65px)] sm:h-[calc(100vh-73px)]">
         {/* Sidebar */}
-        <aside className="w-full lg:w-96 bg-card border-r border-border p-4 space-y-4 overflow-y-auto">
+        <aside className="w-full lg:w-96 bg-card border-r border-border p-3 sm:p-4 space-y-3 sm:space-y-4 overflow-y-auto max-h-[40vh] lg:max-h-full">
           {/* Search */}
           <div className="space-y-2">
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
-              <Database className="h-4 w-4" />
+            <h2 className="text-xs sm:text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+              <Database className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               Search Parcels
             </h2>
             <SearchBar onSearch={handleSearch} />
@@ -122,22 +109,19 @@ const Home = () => {
 
           {/* Statistics Summary */}
           <div className="space-y-2">
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
-              <FileCheck className="h-4 w-4" />
+            <h2 className="text-xs sm:text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+              <FileCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               Verification Summary
             </h2>
             <StatsSummary records={records} key={recordsVersion} />
           </div>
 
           {/* Selected Parcel Details */}
-          <ParcelDetails
-            parcel={selectedParcel}
-            onEditClick={selectedParcel ? handleEditClick : undefined}
-          />
+          <ParcelDetails parcel={selectedParcel} onEditClick={selectedParcel ? handleEditClick : undefined} />
 
           {/* Legend */}
           <div className="pt-2 border-t border-border">
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+            <h2 className="text-xs sm:text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2 sm:mb-3">
               Map Legend
             </h2>
             <Legend />
@@ -145,10 +129,10 @@ const Home = () => {
         </aside>
 
         {/* Map Container */}
-        <section className="flex-1 p-4">
+        <section className="flex-1 p-2 sm:p-4 min-h-[50vh] lg:min-h-0">
           <div className="h-full rounded-lg overflow-hidden border border-border shadow-sm">
-            <ParcelMap
-              searchedPlotId={searchedPlotId}
+            <ParcelMap 
+              searchedPlotId={searchedPlotId} 
               onParcelClick={handleParcelClick}
               records={records}
               key={recordsVersion}

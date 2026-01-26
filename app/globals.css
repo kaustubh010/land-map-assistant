@@ -7,6 +7,15 @@
    All colors in HSL format
 */
 
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 @layer base {
   :root {
     /* Base colors - professional light theme */
