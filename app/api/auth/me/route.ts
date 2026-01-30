@@ -34,9 +34,7 @@ export async function GET(req: NextRequest) {
       user: {
         email: user.email,
         name: user.name,
-        isArtist: user.isArtist,
         picture: user.picture || null,
-        userName: user.userName || null,
       },
     });
   } catch (error: any) {
