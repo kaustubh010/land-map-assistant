@@ -1,7 +1,6 @@
 import data from "./data.json";
 
 export interface ParcelProperties {
-  fid: number;
   plot_id: string;
   area_map: number;
   owner_name_map?: string;

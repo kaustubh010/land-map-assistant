@@ -1,5 +1,5 @@
 "use client";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -54,10 +54,15 @@ import {
   BarChart3,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
   const records = landRecords;
   const router = useRouter();
+
+  useEffect(() => {
+    toast({ title: "Dashboard - Land Verification" });
+  }, []);
 
   // Process all parcels and compute statistics
   const { matchResults, stats, areaComparisonData, statusDistribution } =

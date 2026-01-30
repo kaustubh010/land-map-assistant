@@ -112,7 +112,7 @@ export function ParcelDetails({ parcel, onEditClick }: ParcelDetailsProps) {
         </div>
         
         {/* Discrepancy Analysis */}
-        {parcel.status === "mismatch" && parcel.areaDifference !== undefined && (
+        {parcel.status === "mismatch" && parcel.areaDifference !== undefined && parcel.areaDifference !== 0 && (
           <div className="space-y-2">
             <h4 className="text-sm font-semibold text-destructive uppercase tracking-wide">
               Discrepancy Detected

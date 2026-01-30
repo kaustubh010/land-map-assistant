@@ -6,16 +6,13 @@ import { SearchBar } from "@/components/SearchBar";
 import { ParcelDetails } from "@/components/ParcelDetails";
 import { StatsSummary } from "@/components/StatsSummary";
 import { Legend } from "@/components/Legend";
-import { ParcelMatchResult } from "@/lib/matching";
+import { matchParcel, ParcelMatchResult } from "@/lib/matching";
 import { MapPin, Database, FileCheck, BarChart3 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 import { ParcelEditDialog } from "@/components/ParcelEditDialog";
 import { landRecords, LandRecord } from "@/data/records";
-import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { useRouter } from "next/navigation";
 
-// ✅ Correct dynamic import (no destructuring)
 const ParcelMap = dynamic(() => import("@/components/ParcelMap"), {
   ssr: false,
 });
@@ -80,19 +77,32 @@ const Home = () => {
       });
 
       // Update the selected parcel with new data
-      setSelectedParcel(editedParcel);
+      setSelectedParcel(
+        matchParcel(editedParcel, [
+          ...records.map((r) =>
+            r.plot_id === editedParcel.plot_id
+              ? {
+                  ...r,
+                  area_record: recordUpdates.area_record,
+                  owner_name: recordUpdates.owner_name_record,
+                }
+              : r,
+          ),
+        ]),
+      );
 
       // Increment version to trigger map re-render
       setRecordsVersion((v) => v + 1);
 
-      toast.success("Record updated successfully!", {
+      toast({
+        title: "Record updated successfully!",
         description: `Changes saved for ${editedParcel.plot_id}`,
       });
     },
     [],
   );
 
- return (
+  return (
     <div className="bg-background">
       {/* Main Content */}
       <main className="flex flex-col lg:flex-row h-[calc(100vh-65px)] sm:h-[calc(100vh-73px)]">
@@ -117,7 +127,10 @@ const Home = () => {
           </div>
 
           {/* Selected Parcel Details */}
-          <ParcelDetails parcel={selectedParcel} onEditClick={selectedParcel ? handleEditClick : undefined} />
+          <ParcelDetails
+            parcel={selectedParcel}
+            onEditClick={selectedParcel ? handleEditClick : undefined}
+          />
 
           {/* Legend */}
           <div className="pt-2 border-t border-border">
@@ -131,9 +144,10 @@ const Home = () => {
         {/* Map Container */}
         <section className="flex-1 p-2 sm:p-4 min-h-[50vh] lg:min-h-0">
           <div className="h-full rounded-lg overflow-hidden border border-border shadow-sm">
-            <ParcelMap 
-              searchedPlotId={searchedPlotId} 
+            <ParcelMap
+              searchedPlotId={searchedPlotId}
               onParcelClick={handleParcelClick}
+              onSearchComplete={() => setSearchedPlotId(null)}
               records={records}
               key={recordsVersion}
             />

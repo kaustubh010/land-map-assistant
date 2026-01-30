@@ -28,33 +28,43 @@ function calculateAreaDifference(areaMap: number, areaRecord: number): number {
   return Math.abs((areaMap - areaRecord) / avgArea) * 100;
 }
 
+function normalizeOwner(name?: string): string {
+  return (name || "").trim().toLowerCase();
+}
+
 /**
  * Match a single parcel from map data against land records
  * Returns match result with status and any discrepancy details
  * @param parcelProps - Properties from the map parcel
  * @param records - Optional custom records array (defaults to landRecords)
  */
-export function matchParcel(parcelProps: ParcelProperties, records: LandRecord[] = landRecords): ParcelMatchResult {
+export function matchParcel(
+  parcelProps: ParcelProperties,
+  records: LandRecord[] = landRecords,
+): ParcelMatchResult {
   const { plot_id, area_map, owner_name_map } = parcelProps;
-  
+
   // Find matching record by plot_id
-  const record = records.find(r => r.plot_id === plot_id);
-  
+  const record = records.find((r) => r.plot_id === plot_id);
+
   // Case 1: No matching record found - Missing
   if (!record) {
     return {
       plot_id,
       area_map,
       owner_name_map,
-      status: "missing"
+      status: "missing",
     };
   }
-  
-  // Case 2: Record found - check area difference
+
+  // Case 2: Record found - check area + owner difference
   const areaDifference = calculateAreaDifference(area_map, record.area_record);
-  
-  // If difference exceeds tolerance, it's a mismatch
-  if (areaDifference > AREA_TOLERANCE_PERCENT) {
+
+  const ownerMismatch =
+    normalizeOwner(owner_name_map) !== normalizeOwner(record.owner_name);
+
+  // If area OR owner differs -> mismatch
+  if (areaDifference > AREA_TOLERANCE_PERCENT || ownerMismatch) {
     return {
       plot_id,
       area_map,
@@ -62,10 +72,10 @@ export function matchParcel(parcelProps: ParcelProperties, records: LandRecord[]
       owner_name_map,
       owner_name_record: record.owner_name,
       status: "mismatch",
-      areaDifference
+      areaDifference,
     };
   }
-  
+
   // Case 3: Areas match within tolerance
   return {
     plot_id,
@@ -74,7 +84,7 @@ export function matchParcel(parcelProps: ParcelProperties, records: LandRecord[]
     owner_name_map,
     owner_name_record: record.owner_name,
     status: "matched",
-    areaDifference
+    areaDifference,
   };
 }
 

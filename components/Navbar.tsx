@@ -1,31 +1,69 @@
 "use client";
-import { BarChart3, Map, MapPin } from "lucide-react";
+
+import {
+  BarChart3,
+  Heart,
+  LogOut,
+  Map,
+  MapPin,
+  Settings,
+  ShoppingBag,
+  User,
+  Menu,
+} from "lucide-react";
 import React from "react";
 import { Button } from "./ui/button";
 import { ThemeToggle } from "./ThemeToggle";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 const Navbar = () => {
   const router = useRouter();
   const pathname = usePathname();
+  const { user, logout } = useAuth();
+
+  const getInitials = (name: string) =>
+    name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .substring(0, 2);
+
   return (
-    <header className="bg-card border-b border-border px-4 sm:px-6 py-3 sm:py-4">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <Link href="/">
-          <div className="flex items-center gap-3">
-            <div className="text-5xl">🗺️</div>
-            <div>
-              <h1 className="text-base sm:text-xl font-semibold text-foreground">
-                Land Record Digitization Assistant
-              </h1>
-              <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
-                Village Parcel Verification System
-              </p>
-            </div>
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 items-center justify-between px-4">
+        {/* Logo Section */}
+        <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+          <div className="h-9 w-9 rounded-lg flex items-center justify-center">
+            <img src="/logo.png" alt="LandRecord Logo" />
+          </div>
+          <div className="hidden sm:block">
+            <h1 className="text-lg font-semibold leading-tight">
+              LandRecord
+            </h1>
+            <p className="text-xs text-muted-foreground leading-tight">
+              Village Parcel Verification
+            </p>
+          </div>
+          <div className="sm:hidden">
+            <h1 className="text-base font-semibold">LandRecord</h1>
           </div>
         </Link>
+
+        {/* Actions Section */}
         <div className="flex items-center gap-2">
+          {/* Map/Dashboard Toggle */}
           <Button
             onClick={() =>
               pathname === "/dashboard"
@@ -34,23 +72,119 @@ const Navbar = () => {
             }
             variant="outline"
             size="sm"
-            className="text-xs sm:text-sm"
+            className="h-9"
           >
             {pathname === "/dashboard" ? (
               <>
-                <Map className="mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">Show Map</span>
-                <span className="sm:hidden">Map</span>
+                <Map className="h-4 w-4" />
+                <span className="ml-2 hidden md:inline">Map View</span>
               </>
             ) : (
               <>
-                <BarChart3 className="mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">View Report</span>
-                <span className="sm:hidden">Report</span>
+                <BarChart3 className="h-4 w-4" />
+                <span className="ml-2 hidden md:inline">Dashboard</span>
               </>
             )}
           </Button>
+
+          {/* Theme Toggle */}
           <ThemeToggle />
+
+          {/* Auth Section */}
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative h-9 w-9 rounded-full"
+                >
+                  <Avatar className="h-9 w-9">
+                    {user.picture && <AvatarImage src={user.picture} alt={user.name} />}
+                    <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
+                      {getInitials(user.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{user.name}</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem asChild>
+                  <Link href="/profile" className="cursor-pointer">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem asChild>
+                  <Link href="/favorites" className="cursor-pointer">
+                    <Heart className="mr-2 h-4 w-4" />
+                    <span>Favorites</span>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem asChild>
+                  <Link href="/cart" className="cursor-pointer">
+                    <ShoppingBag className="mr-2 h-4 w-4" />
+                    <span>Cart</span>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem asChild>
+                  <Link href="/orders" className="cursor-pointer">
+                    <ShoppingBag className="mr-2 h-4 w-4" />
+                    <span>Orders</span>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem asChild>
+                  <Link href="/settings" className="cursor-pointer">
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem
+                  onClick={logout}
+                  className="cursor-pointer text-destructive focus:text-destructive"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Logout</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.push("/login")}
+                className="hidden sm:flex"
+              >
+                Sign in
+              </Button>
+
+              <Button
+                size="sm"
+                onClick={() => router.push("/signup")}
+              >
+                Get Started
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </header>
