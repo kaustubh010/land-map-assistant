@@ -3,6 +3,7 @@
 // Includes intentional discrepancies for testing matching logic
 
 export interface LandRecord {
+  id?: string; // Database ID
   plot_id: string;
   owner_name: string;
   area_record: number; // in hectares

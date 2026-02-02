@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { parcelsGeoJSON, ParcelProperties } from "@/data/parcels";
 
 interface SearchBarProps {
-  onSearch: (plotId: string | null) => void;
+  onSearch: (plotIds: string[] | null) => void;
 }
 
 export function SearchBar({ onSearch }: SearchBarProps) {
@@ -26,12 +26,25 @@ export function SearchBar({ onSearch }: SearchBarProps) {
       return;
     }
     
-    // Check if plot exists
+    // Check if it's a plot ID search
     if (validPlotIds.includes(trimmed)) {
       setError(null);
-      onSearch(trimmed);
+      onSearch([trimmed]);
+      return;
+    }
+    
+    // Search by owner name (case-insensitive)
+    const matchingParcels = parcelsGeoJSON.features.filter(f => {
+      const ownerName = (f.properties as ParcelProperties).owner_name_map;
+      return ownerName && ownerName.toLowerCase().includes(searchValue.trim().toLowerCase());
+    });
+    
+    if (matchingParcels.length > 0) {
+      const plotIds = matchingParcels.map(f => (f.properties as ParcelProperties).plot_id);
+      setError(null);
+      onSearch(plotIds);
     } else {
-      setError(`Plot "${trimmed}" not found in map data`);
+      setError(`No plots found for "${trimmed}"`);
       onSearch(null);
     }
   };
@@ -55,7 +68,7 @@ export function SearchBar({ onSearch }: SearchBarProps) {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search by Plot ID (e.g., VLG-001)"
+            placeholder="Search by Plot ID or Owner Name"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             onKeyDown={handleKeyDown}

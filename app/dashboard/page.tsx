@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Card,
   CardContent,
@@ -22,6 +22,11 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import {
   PieChart,
@@ -52,6 +57,8 @@ import {
   HelpCircle,
   TrendingUp,
   BarChart3,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
@@ -59,10 +66,7 @@ import { toast } from "@/hooks/use-toast";
 const Dashboard = () => {
   const records = landRecords;
   const router = useRouter();
-
-  useEffect(() => {
-    toast({ title: "Dashboard - Land Verification" });
-  }, []);
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
   // Process all parcels and compute statistics
   const { matchResults, stats, areaComparisonData, statusDistribution } =
@@ -413,12 +417,24 @@ const Dashboard = () => {
         {/* Detailed Data Table */}
         <Card className="overflow-hidden">
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-base sm:text-lg">
-              Detailed Parcel Report
-            </CardTitle>
-            <CardDescription className="text-xs sm:text-sm">
-              Complete list of all parcels with verification status
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-base sm:text-lg">
+                  Detailed Parcel Report
+                </CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
+                  Complete list of all parcels with verification status
+                </CardDescription>
+              </div>
+              <Button
+                size="sm"
+                onClick={handleDownloadReport}
+                className="h-8 px-3 text-xs"
+              >
+                <Download className="mr-1.5 h-3.5 w-3.5" />
+                Export
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
             <div className="rounded-md border overflow-x-auto">
@@ -447,48 +463,123 @@ const Dashboard = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {matchResults.map((result) => (
-                    <TableRow key={result.plot_id}>
-                      <TableCell className="font-medium text-xs sm:text-sm">
-                        {result.plot_id}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={getStatusBadgeVariant(result.status)}
-                          className="text-[10px] sm:text-xs"
-                        >
-                          {getStatusLabel(result.status)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right text-xs sm:text-sm">
-                        {result.area_map.toFixed(2)}
-                      </TableCell>
-                      <TableCell className="text-right text-xs sm:text-sm">
-                        {result.area_record?.toFixed(2) || "—"}
-                      </TableCell>
-                      <TableCell className="text-right text-xs sm:text-sm hidden sm:table-cell">
-                        {result.areaDifference !== undefined ? (
-                          <span
-                            className={
-                              result.areaDifference > 5
-                                ? "text-red-600 dark:text-red-400 font-medium"
-                                : "text-green-600 dark:text-green-400"
-                            }
-                          >
-                            {result.areaDifference.toFixed(1)}%
-                          </span>
-                        ) : (
-                          "—"
+                  {matchResults.map((result) => {
+                    const isExpanded = expandedRows.has(result.plot_id);
+                    const feature = parcelsGeoJSON.features.find(
+                      f => f.properties.plot_id === result.plot_id
+                    );
+                    const coordinates = feature?.geometry.type === "Polygon" 
+                      ? feature.geometry.coordinates[0] as [number, number][]
+                      : [];
+
+                    return (
+                      <>
+                        <TableRow key={result.plot_id} className="cursor-pointer" onClick={() => {
+                          const newExpanded = new Set(expandedRows);
+                          if (isExpanded) {
+                            newExpanded.delete(result.plot_id);
+                          } else {
+                            newExpanded.add(result.plot_id);
+                          }
+                          setExpandedRows(newExpanded);
+                        }}>
+                          <TableCell className="font-medium text-xs sm:text-sm">
+                            <div className="flex items-center gap-2">
+                              {isExpanded ? (
+                                <ChevronDown className="h-4 w-4" />
+                              ) : (
+                                <ChevronRight className="h-4 w-4" />
+                              )}
+                              {result.plot_id}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={getStatusBadgeVariant(result.status)}
+                              className="text-[10px] sm:text-xs"
+                            >
+                              {getStatusLabel(result.status)}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right text-xs sm:text-sm">
+                            {result.area_map.toFixed(2)}
+                          </TableCell>
+                          <TableCell className="text-right text-xs sm:text-sm">
+                            {result.area_record?.toFixed(2) || "—"}
+                          </TableCell>
+                          <TableCell className="text-right text-xs sm:text-sm hidden sm:table-cell">
+                            {result.areaDifference !== undefined ? (
+                              <span
+                                className={
+                                  result.areaDifference > 5
+                                    ? "text-red-600 dark:text-red-400 font-medium"
+                                    : "text-green-600 dark:text-green-400"
+                                }
+                              >
+                                {result.areaDifference.toFixed(1)}%
+                              </span>
+                            ) : (
+                              "—"
+                            )}
+                          </TableCell>
+                          <TableCell className="text-xs sm:text-sm hidden md:table-cell">
+                            {result.owner_name_map || "—"}
+                          </TableCell>
+                          <TableCell className="text-xs sm:text-sm hidden lg:table-cell">
+                            {result.owner_name_record || "—"}
+                          </TableCell>
+                        </TableRow>
+                        {isExpanded && (
+                          <TableRow key={`${result.plot_id}-details`}>
+                            <TableCell colSpan={7} className="bg-muted/30">
+                              <div className="p-4 space-y-3">
+                                <h4 className="font-semibold text-sm">Parcel Details</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                                  <div>
+                                    <span className="font-medium">Plot ID:</span> {result.plot_id}
+                                  </div>
+                                  <div>
+                                    <span className="font-medium">Status:</span> {getStatusLabel(result.status)}
+                                  </div>
+                                  <div>
+                                    <span className="font-medium">Map Area:</span> {result.area_map.toFixed(2)} ha
+                                  </div>
+                                  <div>
+                                    <span className="font-medium">Record Area:</span> {result.area_record?.toFixed(2) || "N/A"} ha
+                                  </div>
+                                  <div>
+                                    <span className="font-medium">Owner (Map):</span> {result.owner_name_map || "N/A"}
+                                  </div>
+                                  <div>
+                                    <span className="font-medium">Owner (Record):</span> {result.owner_name_record || "N/A"}
+                                  </div>
+                                  {result.areaDifference !== undefined && (
+                                    <div>
+                                      <span className="font-medium">Area Difference:</span> {result.areaDifference.toFixed(1)}%
+                                    </div>
+                                  )}
+                                </div>
+                                {coordinates.length > 0 && (
+                                  <div className="mt-3">
+                                    <h5 className="font-medium text-sm mb-2">Coordinates</h5>
+                                    <div className="bg-background rounded p-3 max-h-40 overflow-y-auto">
+                                      <div className="font-mono text-xs space-y-1">
+                                        {coordinates.map((coord, idx) => (
+                                          <div key={idx}>
+                                            Point {idx + 1}: [{coord[1].toFixed(6)}, {coord[0].toFixed(6)}]
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
                         )}
-                      </TableCell>
-                      <TableCell className="text-xs sm:text-sm hidden md:table-cell">
-                        {result.owner_name_map || "—"}
-                      </TableCell>
-                      <TableCell className="text-xs sm:text-sm hidden lg:table-cell">
-                        {result.owner_name_record || "—"}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                      </>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
@@ -524,14 +615,6 @@ const Dashboard = () => {
                 >
                   <MapPin className="mr-1.5 h-3.5 w-3.5" />
                   Map
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={handleDownloadReport}
-                  className="h-8 px-3 text-xs"
-                >
-                  <Download className="mr-1.5 h-3.5 w-3.5" />
-                  Export
                 </Button>
               </div>
             </div>

@@ -1,6 +1,7 @@
 import { Lucia } from "lucia";
 import { PrismaAdapter } from "@lucia-auth/adapter-prisma";
 import { prisma } from "./prisma";
+import { cookies } from "next/headers";
 
 const adapter = new PrismaAdapter(prisma.session, prisma.user);
 
@@ -34,4 +35,29 @@ declare module "lucia" {
       userName: string | null;
     };
   }
+}
+
+/**
+ * Get current session and user from cookies
+ * Used in API routes for authentication
+ */
+export async function getCurrentSession() {
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get(lucia.sessionCookieName);
+
+  if (!sessionCookie) {
+    return { user: null, session: null };
+  }
+
+  const result = await lucia.validateSession(sessionCookie.value);
+
+  if (!result || !result.session || !result.session.userId) {
+    return { user: null, session: null };
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: result.session.userId },
+  });
+
+  return { user, session: result.session };
 }

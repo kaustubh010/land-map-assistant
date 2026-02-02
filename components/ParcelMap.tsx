@@ -6,17 +6,17 @@ import { matchParcel, getStatusColor, getStatusLabel, ParcelMatchResult } from "
 import { LandRecord } from "@/data/records";
 
 interface ParcelMapProps {
-  searchedPlotId: string | null;
+  searchedPlotIds: string[] | null;
   onParcelClick: (result: ParcelMatchResult) => void;
   onSearchComplete?: () => void; // Add callback to reset search
   records: LandRecord[];
 }
 
-export default function ParcelMap({ searchedPlotId, onParcelClick, onSearchComplete, records }: ParcelMapProps) {
+export default function ParcelMap({ searchedPlotIds, onParcelClick, onSearchComplete, records }: ParcelMapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const geoJsonLayerRef = useRef<L.GeoJSON | null>(null);
-  const [selectedPlotId, setSelectedPlotId] = useState<string | null>(null);
+  const [selectedPlotIds, setSelectedPlotIds] = useState<string[]>([]);
 
   // Center coordinates for the village
   const center: [number, number] = [12.9700, 77.5960];
@@ -80,34 +80,47 @@ export default function ParcelMap({ searchedPlotId, onParcelClick, onSearchCompl
     }
   }, []);
 
-  // Center on searched parcel and select it
+  // Center on searched parcels and select them
   useEffect(() => {
-    if (!mapRef.current || !searchedPlotId) return;
+    if (!mapRef.current || !searchedPlotIds || searchedPlotIds.length === 0) return;
 
-    const feature = parcelsGeoJSON.features.find(
-      f => f.properties.plot_id === searchedPlotId
-    );
+    const allLatLngs: L.LatLng[] = [];
+    const matchResults: ParcelMatchResult[] = [];
 
-    if (feature && feature.geometry.type === "Polygon") {
-      const coords = feature.geometry.coordinates[0] as [number, number][];
-      const latLngs = coords.map(([lng, lat]) => L.latLng(lat, lng));
-      const bounds = L.latLngBounds(latLngs);
+    searchedPlotIds.forEach(plotId => {
+      const feature = parcelsGeoJSON.features.find(
+        f => f.properties.plot_id === plotId
+      );
+
+      if (feature && feature.geometry.type === "Polygon") {
+        const coords = feature.geometry.coordinates[0] as [number, number][];
+        const latLngs = coords.map(([lng, lat]) => L.latLng(lat, lng));
+        allLatLngs.push(...latLngs);
+        
+        const props = feature.properties as ParcelProperties;
+        const matchResult = matchParcel(props, records);
+        matchResults.push(matchResult);
+      }
+    });
+
+    if (allLatLngs.length > 0) {
+      const bounds = L.latLngBounds(allLatLngs);
       mapRef.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 17 });
       
-      // Select the parcel
-      setSelectedPlotId(searchedPlotId);
+      // Select all the parcels
+      setSelectedPlotIds(searchedPlotIds);
       
-      // Trigger the click handler
-      const props = feature.properties as ParcelProperties;
-      const matchResult = matchParcel(props, records);
-      onParcelClick(matchResult);
+      // Trigger the click handler for the first parcel
+      if (matchResults.length > 0) {
+        onParcelClick(matchResults[0]);
+      }
       
       // Reset the search after handling
       if (onSearchComplete) {
         onSearchComplete();
       }
     }
-  }, [searchedPlotId, onParcelClick, onSearchComplete, records]);
+  }, [searchedPlotIds, onParcelClick, onSearchComplete, records]);
 
   // Add GeoJSON layer and handle updates
   useEffect(() => {
@@ -121,7 +134,7 @@ export default function ParcelMap({ searchedPlotId, onParcelClick, onSearchCompl
     // Create new GeoJSON layer
     const geoJsonLayer = L.geoJSON(parcelsGeoJSON as GeoJSON.FeatureCollection, {
       style: (feature) => {
-        const isSelected = feature?.properties?.plot_id === selectedPlotId;
+        const isSelected = feature?.properties?.plot_id && selectedPlotIds.includes(feature.properties.plot_id);
         return getFeatureStyle(feature, isSelected);
       },
       onEachFeature: (feature, layer) => {
@@ -153,9 +166,23 @@ export default function ParcelMap({ searchedPlotId, onParcelClick, onSearchCompl
 
         layer.bindPopup(popupContent);
 
+        // Add tooltip for hover
+        const tooltipContent = `
+          <div style="font-size: 12px;">
+            <strong>${props.plot_id}</strong><br/>
+            Area: ${Number(props.area_map).toFixed(2)} ha<br/>
+            ${props.owner_name_map ? `Owner: ${props.owner_name_map}<br/>` : ''}
+            Status: ${getStatusLabel(matchResult.status)}
+          </div>
+        `;
+        layer.bindTooltip(tooltipContent, {
+          sticky: true,
+          opacity: 0.9
+        });
+
         // Handle click to show details in sidebar
         layer.on('click', () => {
-          setSelectedPlotId(props.plot_id);
+          setSelectedPlotIds([props.plot_id]);
           onParcelClick(matchResult);
         });
 
@@ -170,7 +197,7 @@ export default function ParcelMap({ searchedPlotId, onParcelClick, onSearchCompl
 
         layer.on('mouseout', (e) => {
           const l = e.target as L.Path;
-          const isSelected = props.plot_id === selectedPlotId;
+          const isSelected = selectedPlotIds.includes(props.plot_id);
           l.setStyle(getFeatureStyle(feature, isSelected));
         });
       }
@@ -179,7 +206,7 @@ export default function ParcelMap({ searchedPlotId, onParcelClick, onSearchCompl
     geoJsonLayer.addTo(mapRef.current);
     geoJsonLayerRef.current = geoJsonLayer;
 
-  }, [selectedPlotId, onParcelClick, getFeatureStyle, records]);
+  }, [selectedPlotIds, onParcelClick, getFeatureStyle, records]);
 
   return (
     <div 

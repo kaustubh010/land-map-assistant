@@ -112,18 +112,33 @@ export function ParcelDetails({ parcel, onEditClick }: ParcelDetailsProps) {
         </div>
         
         {/* Discrepancy Analysis */}
-        {parcel.status === "mismatch" && parcel.areaDifference !== undefined && parcel.areaDifference !== 0 && (
+        {parcel.status === "mismatch" && (
           <div className="space-y-2">
             <h4 className="text-sm font-semibold text-destructive uppercase tracking-wide">
               Discrepancy Detected
             </h4>
-            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
-              <p className="text-sm">
-                Area difference: <strong>{parcel.areaDifference.toFixed(1)}%</strong>
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Threshold exceeded (max 5% allowed)
-              </p>
+            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3 space-y-2">
+              {parcel.areaDifference !== undefined && parcel.areaDifference > 5 && (
+                <div>
+                  <p className="text-sm">
+                    Area difference: <strong>{parcel.areaDifference.toFixed(1)}%</strong>
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Threshold exceeded (max 5% allowed)
+                  </p>
+                </div>
+              )}
+              {parcel.owner_name_map && parcel.owner_name_record && 
+               parcel.owner_name_map.toLowerCase().trim() !== parcel.owner_name_record.toLowerCase().trim() && (
+                <div>
+                  <p className="text-sm">
+                    <strong>Owner mismatch detected</strong>
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Map owner and record owner do not match
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         )}

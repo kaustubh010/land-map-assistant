@@ -10,6 +10,7 @@ import {
   ShoppingBag,
   User,
   Menu,
+  History,
 } from "lucide-react";
 import React from "react";
 import { Button } from "./ui/button";
@@ -119,44 +120,14 @@ const Navbar = () => {
                 </DropdownMenuLabel>
 
                 <DropdownMenuSeparator />
-
-                <DropdownMenuItem asChild>
-                  <Link href="/profile" className="cursor-pointer">
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </Link>
+                <DropdownMenuItem
+                  onClick={() => router.push("/audit-history")}
+                  className="cursor-pointer"
+                >
+                  <History className="mr-2 h-4 w-4" />
+                  <span>Audit History</span>
                 </DropdownMenuItem>
-
-                <DropdownMenuItem asChild>
-                  <Link href="/favorites" className="cursor-pointer">
-                    <Heart className="mr-2 h-4 w-4" />
-                    <span>Favorites</span>
-                  </Link>
-                </DropdownMenuItem>
-
-                <DropdownMenuItem asChild>
-                  <Link href="/cart" className="cursor-pointer">
-                    <ShoppingBag className="mr-2 h-4 w-4" />
-                    <span>Cart</span>
-                  </Link>
-                </DropdownMenuItem>
-
-                <DropdownMenuItem asChild>
-                  <Link href="/orders" className="cursor-pointer">
-                    <ShoppingBag className="mr-2 h-4 w-4" />
-                    <span>Orders</span>
-                  </Link>
-                </DropdownMenuItem>
-
-                <DropdownMenuItem asChild>
-                  <Link href="/settings" className="cursor-pointer">
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
-                  </Link>
-                </DropdownMenuItem>
-
                 <DropdownMenuSeparator />
-
                 <DropdownMenuItem
                   onClick={logout}
                   className="cursor-pointer text-destructive focus:text-destructive"

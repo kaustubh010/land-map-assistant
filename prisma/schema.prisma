@@ -14,15 +14,17 @@ datasource db {
 }
 
 model User {
-  id             String    @id
-  googleId       String?    @unique @map("google_id")
-  email          String    @unique
-  hashedPassword String    @map("hashed_password")
-  name       String?   @map("full_name")
-  picture String?   @map("profile_picture")
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at")
+  id             String      @id
+  googleId       String?     @unique @map("google_id")
+  email          String      @unique
+  hashedPassword String      @map("hashed_password")
+  name           String?     @map("full_name")
+  picture        String?     @map("profile_picture")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @default(now()) @updatedAt @map("updated_at")
   sessions       Session[]
+  parcels        Parcel[]
+  changeLogs     ChangeLog[]
 
   @@map("users")
 }
@@ -34,4 +36,40 @@ model Session {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("sessions")
+}
+
+model Parcel {
+  id          String      @id @default(cuid())
+  plotId      String      @map("plot_id")
+  ownerName   String      @map("owner_name")
+  areaRecord  Float       @map("area_record")
+  userId      String      @map("user_id")
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  changeLogs  ChangeLog[]
+
+  @@unique([userId, plotId])
+  @@index([userId])
+  @@index([plotId])
+  @@map("parcels")
+}
+
+model ChangeLog {
+  id          String   @id @default(cuid())
+  parcelId    String?  @map("parcel_id")
+  parcel      Parcel?  @relation(fields: [parcelId], references: [id], onDelete: SetNull)
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action      String   // "create", "update", "delete", "bulk_upload"
+  fieldName   String?  @map("field_name")
+  oldValue    String?  @map("old_value")
+  newValue    String?  @map("new_value")
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([parcelId])
+  @@index([createdAt])
+  @@map("change_logs")
 }
