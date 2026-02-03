@@ -54,6 +54,15 @@ export default function ParcelMap({ searchedPlotIds, onParcelClick, onSearchComp
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map);
 
+    const style = document.createElement("style");
+  style.innerHTML = `
+    .leaflet-interactive {
+      outline: none !important;
+    }
+  `;
+  document.head.appendChild(style);
+
+
     mapRef.current = map;
 
     // Cleanup on unmount
@@ -166,13 +175,27 @@ export default function ParcelMap({ searchedPlotIds, onParcelClick, onSearchComp
 
         layer.bindPopup(popupContent);
 
-        // Add tooltip for hover
+          // Add tooltip for hover
         const tooltipContent = `
-          <div style="font-size: 12px;">
-            <strong>${props.plot_id}</strong><br/>
-            Area: ${Number(props.area_map).toFixed(2)} ha<br/>
-            ${props.owner_name_map ? `Owner: ${props.owner_name_map}<br/>` : ''}
-            Status: ${getStatusLabel(matchResult.status)}
+          <div style="font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; min-width: 180px; padding: 4px;">
+            <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px; color: #111827;">${props.plot_id}</div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 2px; color: #374151;">
+              <span>Map Area:</span>
+              <span style="font-weight: 500;">${Number(props.area_map).toFixed(2)} ha</span>
+            </div>
+             ${matchResult.area_record !== undefined 
+                ? `<div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 2px; color: #374151;">
+                     <span>Record Area:</span>
+                     <span style="font-weight: 500;">${matchResult.area_record.toFixed(2)} ha</span>
+                   </div>` 
+                : ''
+              }
+            ${props.owner_name_map ? `<div style="font-size: 11px; color: #6b7280; margin-top: 4px; border-top: 1px solid #e5e7eb; padding-top: 4px;">Owner: ${props.owner_name_map}</div>` : ''}
+            <div style="margin-top: 6px;">
+              <span style="padding: 2px 6px; border-radius: 9999px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: white; background-color: ${getStatusColor(matchResult.status)}">
+                ${getStatusLabel(matchResult.status)}
+              </span>
+            </div>
           </div>
         `;
         layer.bindTooltip(tooltipContent, {
