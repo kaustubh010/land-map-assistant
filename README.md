@@ -1,194 +1,277 @@
-# 🗺️ Land Record Digitization Assistant
 
-A web-based GIS application that bridges spatial land parcel maps with textual ownership records to automatically detect discrepancies and enable safe digital corrections.
+🗺️ Land Record Digitization Assistant
+======================================
 
----
+**GeoJSON-Based Reconciliation System**
 
-## 📌 Overview
+A web-based land record reconciliation system that links **GeoJSON parcel maps** with **textual ownership records** to detect inconsistencies, allow controlled edits, and maintain a complete audit trail.
 
-Land records in many regions are maintained across separate systems:
+This project demonstrates how spatial data and record data—maintained independently—can be reconciled programmatically and visualized interactively.
 
-- Spatial survey maps defining parcel boundaries
-- Textual ownership registers containing plot details
+1️⃣ System Overview
+-------------------
 
-Over time, these datasets diverge, resulting in:
-- Area mismatches
-- Missing or duplicated plot
-- Incorrect ownership information
+Land records are represented in two independent datasets:
 
-This project provides an interactive platform to reconcile these datasets visually and programmatically, helping authorities identify inconsistencies and correct them efficiently.
+1.  **Spatial Parcel Data** Stored as **GeoJSON (data.json)**, containing:
+    *   Parcel geometry
+    *   Plot ID
+    *   Owner name (map-side)
+    *   Area calculated from map
 
----
+2.  **Textual Ownership Records** Stored in a **PostgreSQL database** via Prisma ORM, containing:
+    *   Plot ID
+    *   Owner name (record-side)
+    *   Recorded area
+    *   User attribution
+    *   Edit history
 
-## 🎯 Problem Statement
+The system compares these datasets to:
+*   Detect mismatches
+*   Visualize discrepancies on a map
+*   Allow authorized corrections
+*   Log every change for audit purposes
 
-Manual reconciliation of land maps and ownership records is slow, error-prone, and difficult to audit.
+2️⃣ Spatial Data Format (GeoJSON)
+---------------------------------
 
-### The goal is to:
+### 📂 data.json
 
-- Link parcel geometry with ownership records
-- Automatically flag inconsistencies
-- Provide a secure interface for authorized corrections
-- Maintain an audit trail for all changes
+Spatial data is provided as a **GeoJSON FeatureCollection**.
 
----
+### Feature Structure
 
-## ✅ Key Features (MVP)
-
-### 🗺️ Interactive Parcel Map
-
-- Displays village land parcels as irregular polygons
-- Zoom and pan functionality
-- Click any parcel to view plot details
-
-### 🔍 Search
-
-- Search parcels by plot_id
-- Automatically centers and highlights selected plots
-
----
-
-## ⚠️ Automated Discrepancy Detection
-
-### Detects and flags:
-
-- Plots present in maps but missing in records
-- Plots present in records but missing in maps
-- Area mismatches beyond configurable thresholds
-
-### Parcels are color-coded:
-
-- 🟢 Matched
-- 🔴 Mismatch
-- ⚪ Missing data
-
-## ✏️ Basic Record Editing
-
-- Update ownership or area values
-- Changes are logged for traceability
-
----
-
-## 🧱 System Architecture
-
-```bash
-    Frontend (Next.js + leaflet)
-        ↓
-    Backend API (Node.js)
-        ↓
-    PostgreSQL
+```json
+{
+  "type": "Feature",
+  "properties": {
+    "fid": 1,
+    "plot_id": "1",
+    "owner_name_map": "Amit",
+    "area_map": 0.3910684714208958
+  },
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [ ... ]
+  }
+}
 ```
-- Ownership records are imported from CSV
-- Discrepancies are computed by comparing both datasets
 
-## 🛠️ Tech Stack
+### Used Fields
 
-### Frontend
-- Next.js / React
-- Tailwind CSS
-- Leaflet
-- GeoJSON
+| Field | Description |
+|---|---|
+| plot_id | Unique plot number (linking key) |
+| owner_name_map | Owner name as per map |
+| area_map | Area derived from parcel geometry |
+| geometry | Parcel boundary polygon |
 
-### Backend
-- Node.js
-- REST APIs
+This file is loaded directly by the frontend map and backend reconciliation logic.
 
-### Database
-- PostgreSQL
+3️⃣ Database Schema (Prisma)
+----------------------------
 
-### Utilities
-- CSV parsing
-- Raw SQL for spatial queries
-- Prisma ORM
+### 👤 User
 
----
+Stores authenticated users performing uploads or edits.
 
-## 📂 Data Sources
-### Spatial Data
+```text
+User
+- id
+- email
+- name
+- picture
+- createdAt
+- updatedAt
+```
 
-- Sample village parcel boundaries in GeoJSON format
-- Each parcel includes plot_id and polygon geometry
+Users are linked to:
+*   Uploaded parcel records
+*   Change logs
 
-### Textual Records
+### 📄 Parcel (Textual Ownership Record)
 
-- CSV files containing:
-    - plot_id
-    - owner_name
-    - area
+Represents **official record-side data**.
 
-These two datasets are treated as independent sources and reconciled within the system.
+```text
+Parcel
+- id
+- plotId
+- ownerName
+- areaRecord
+- userId
+- createdAt
+- updatedAt
+```
 
----
+Constraints:
+*   Unique per user + plot ID
+*   Indexed for fast search
 
-## 🔄 Data Flow
+This table is populated via CSV upload or manual entry.
 
-1. Load parcel geometry into PostGIS
-2. Upload CSV ownership records
-3. Run reconciliation logic
-4. Store detected discrepancies
-5. Visualize results on map
-6. Allow authorized edits
-7. Log all changes
+### ✏️ ChangeLog (Audit Trail)
 
----
-## 🧪 Discrepancy Logic (Simplified)
+Tracks **every modification** to parcel records.
 
-- Missing plot in map or records
-- Area difference exceeding threshold
-- Ownership mismatch
+```text
+ChangeLog
+- id
+- parcelId
+- userId
+- action
+- fieldName
+- oldValue
+- newValue
+- description
+- createdAt
+```
 
-Detected issues are stored and visualized in real time.
+Used for:
+*   Traceability
+*   Accountability
+*   Audit verification
 
----
-## 🔐 Authorization (Planned)
-The MVP uses simplified access control.
+4️⃣ Reconciliation Logic
+------------------------
 
-Future versions will include:
+Reconciliation is performed by **matching plot_id** across:
+*   GeoJSON features (data.json)
+*   Parcel records (Parcel table)
 
-- Role-based authentication:
-    - Viewer (read-only)
-    - Editor (propose changes)
-    - Admin (approve changes)
-- JWT-based login
-- Approval workflows
-- Versioned records
+### Detected Conditions
 
----
-## 🗄️ Database Design (Planned)
-Core tables:
-- users
-- parcel_map
-- parcel_record
-- discrepancies
-- edit_logs
+| Condition | Description |
+|---|---|
+| Missing in records | Plot exists in GeoJSON but not in DB |
+| Missing in map | Plot exists in DB but not in GeoJSON |
+| Area mismatch | area_map ≠ area_record beyond threshold |
+| Owner mismatch | owner_name_map ≠ owner_name |
 
-All edits will be auditable with timestamps and user attribution.
+Detected issues are surfaced in:
+*   Map visualization
+*   Reconciliation reports
+*   Parcel detail views
 
-## 🚀 Future Enhancements
+5️⃣ Map Visualization Rules
+---------------------------
 
-- Owner-name search
-- Approval workflows for edits
-- Reconciliation reports (PDF/CSV)
-- Dashboard analytics
+Parcels are color-coded based on reconciliation status:
 
----
+| Color | Meaning |
+|---|---|
+| 🟢 Green | Fully matched |
+| 🔴 Red | Mismatch detected |
+| ⚪ Gray | Missing data |
 
-## 📖 User Guide (High Level)
+Clicking a parcel shows:
+*   Map-side values
+*   Record-side values
+*   Differences
 
-- Open map and explore parcels
-- Search by plot ID
-- View discrepancy indicators
-- Select parcel and edit incorrect fields
-- Save changes (logged automatically)
+6️⃣ API Overview
+----------------
 
----
+### 🔍 Search Parcel
 
-## 📊 Sample Outputs
+`GET /api/search?plot_id=1`
 
-- Interactive discrepancy map
-- Reconciliation table
-- Edit history logs
+*   Locates parcel by plot ID
+*   Highlights it on the map
+*   Returns reconciliation status
 
-## 🧭 Project Scope
+### 📄 Fetch Parcel Details
 
-This MVP demonstrates core reconciliation and visualization capabilities using representative sample data. It is designed as a foundation for larger-scale digital land governance systems.
+`GET /api/parcels/{plotId}`
+
+Returns:
+
+```json
+{
+  "plotId": "1",
+  "owner_map": "Amit",
+  "owner_record": "Amit Kumar",
+  "area_map": 0.391,
+  "area_record": 0.36,
+  "status": "AREA_MISMATCH"
+}
+```
+
+### 📤 Upload Records (CSV)
+
+`POST /api/parcels/upload`
+
+Expected columns:
+*   plot_id
+*   owner_name
+*   area
+
+Triggers reconciliation after upload.
+
+### ✏️ Edit Parcel Record
+
+`PUT /api/parcels/{plotId}`
+
+```json
+{
+  "ownerName": "Amit",
+  "areaRecord": 0.39
+}
+```
+
+✔ Automatically logged in ChangeLog
+
+7️⃣ Sample Reconciliation Report
+--------------------------------
+
+### 📊 Summary
+
+| Metric | Count |
+|---|---|
+| Total map plots | 150 |
+| Total record plots | 142 |
+| Fully matched | 120 |
+| Area mismatches | 18 |
+| Missing in records | 12 |
+| Missing in map | 10 |
+
+### ⚠️ Discrepancy List (Example)
+
+| Plot ID | Issue | Map Value | Record Value |
+|---|---|---|---|
+| 1 | Area mismatch | 0.391 | 0.360 |
+| 12 | Missing record | Exists | — |
+| 45 | Owner mismatch | Suresh | Ramesh |
+
+8️⃣ User Guide (For Officials)
+------------------------------
+
+### Step 1: Open Map
+*   View all village plots
+*   Use colors to identify issues
+
+### Step 2: Search Plot
+*   Enter plot number
+*   System zooms to parcel
+
+### Step 3: Review Differences
+*   Compare map vs record values
+*   Understand discrepancy type
+
+### Step 4: Correct Record (Authorized)
+*   Update owner or area
+*   Save changes
+
+### Step 5: Audit
+*   View change history
+*   Verify who edited what and when
+
+9️⃣ Intended Scope
+------------------
+
+This project is designed as:
+*   A **working MVP**
+*   A **proof-of-concept for land digitization**
+*   A **foundation for scalable land governance systems**
+
+It demonstrates how **GeoJSON-based spatial data** and **database-backed ownership records** can be reconciled safely, transparently, and efficiently.
