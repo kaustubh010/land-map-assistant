@@ -7,6 +7,8 @@
 A web-based land record reconciliation system that links **GeoJSON parcel maps** with **textual ownership records** to detect inconsistencies, allow controlled edits, and maintain a complete audit trail.
 
 This project demonstrates how spatial data and record data—maintained independently—can be reconciled programmatically and visualized interactively.
+## Demo
+[![🎥 Watch the Demo Video](https://img.youtube.com/vi/fZ6wJCYmu8k/maxresdefault.jpg)](https://www.youtube.com/watch?v=fZ6wJCYmu8k)
 
 1️⃣ System Overview
 -------------------
