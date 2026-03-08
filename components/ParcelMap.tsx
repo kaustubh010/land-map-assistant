@@ -84,10 +84,20 @@ export default function ParcelMap({ searchedPlotIds, onParcelClick, onSearchComp
       }
     });
 
+    // Add dynamic parcels from database records
+    records.forEach(record => {
+      if (record.north && record.south && record.east && record.west) {
+        allCoords.push([record.north, record.west]);
+        allCoords.push([record.north, record.east]);
+        allCoords.push([record.south, record.east]);
+        allCoords.push([record.south, record.west]);
+      }
+    });
+
     if (allCoords.length) {
       mapRef.current.fitBounds(L.latLngBounds(allCoords), { padding: [50, 50] });
     }
-  }, []);
+  }, [records]);
 
   // Center on searched parcels and select them
   useEffect(() => {
@@ -140,8 +150,45 @@ export default function ParcelMap({ searchedPlotIds, onParcelClick, onSearchComp
       mapRef.current.removeLayer(geoJsonLayerRef.current);
     }
 
+    // Combine static features with dynamic features from records (database parcels with coordinates)
+    const combinedFeatures = [...parcelsGeoJSON.features];
+    
+    records.forEach(record => {
+      // If record has coordinates and isn't already in the static map
+      if (record.north && record.south && record.east && record.west) {
+        const alreadyExists = combinedFeatures.some(f => f.properties.plot_id === record.plot_id);
+        
+        if (!alreadyExists) {
+          // Create a dynamic feature for the map
+          combinedFeatures.push({
+            type: "Feature",
+            properties: {
+              plot_id: record.plot_id,
+              area_map: record.area_record,
+              owner_name_map: record.owner_name
+            },
+            geometry: {
+              type: "Polygon",
+              coordinates: [[
+                [record.west, record.north],
+                [record.east, record.north],
+                [record.east, record.south],
+                [record.west, record.south],
+                [record.west, record.north]
+              ]]
+            }
+          } as any);
+        }
+      }
+    });
+
+    const featureCollection = {
+      type: "FeatureCollection",
+      features: combinedFeatures
+    };
+
     // Create new GeoJSON layer
-    const geoJsonLayer = L.geoJSON(parcelsGeoJSON as GeoJSON.FeatureCollection, {
+    const geoJsonLayer = L.geoJSON(featureCollection as GeoJSON.FeatureCollection, {
       style: (feature) => {
         const isSelected = feature?.properties?.plot_id && selectedPlotIds.includes(feature.properties.plot_id);
         return getFeatureStyle(feature, isSelected);

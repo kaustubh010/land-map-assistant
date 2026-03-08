@@ -2,7 +2,8 @@ import { ParcelMatchResult, getStatusColor, getStatusLabel } from "@/lib/matchin
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, FileText, AlertTriangle, CheckCircle, HelpCircle, Pencil } from "lucide-react";
+import { MapPin, FileText, AlertTriangle, CheckCircle, HelpCircle, Pencil, History as HistoryIcon } from "lucide-react";
+import Link from "next/link";
 
 interface ParcelDetailsProps {
   parcel: ParcelMatchResult | null;
@@ -51,15 +52,27 @@ export function ParcelDetails({ parcel, onEditClick }: ParcelDetailsProps) {
               {getStatusLabel(parcel.status)}
             </Badge>
             {onEditClick && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={onEditClick}
-                className="h-7 gap-1.5 text-xs"
-              >
-                <Pencil className="h-3 w-3" />
-                Edit
-              </Button>
+              <div className="flex gap-1.5">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={onEditClick}
+                  className="h-7 gap-1.5 text-xs"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                  Edit
+                </Button>
+                <Link href={`/plots/${parcel.plot_id}/history`}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 gap-1.5 text-xs hover:bg-primary/10 hover:text-primary hover:border-primary/50"
+                  >
+                    <HistoryIcon className="h-3.5 w-3.5" />
+                    History
+                  </Button>
+                </Link>
+              </div>
             )}
           </div>
         </div>

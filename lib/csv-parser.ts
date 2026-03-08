@@ -2,6 +2,7 @@ export interface ParsedParcel {
   plot_id: string;
   owner_name: string;
   area_record: number;
+  images?: string; // Comma-separated filenames
 }
 
 export interface CSVParseResult {
@@ -46,6 +47,7 @@ export function parseCSV(csvContent: string): CSVParseResult {
     const plotIdIndex = header.indexOf('plot_id');
     const ownerNameIndex = header.indexOf('owner_name');
     const areaRecordIndex = header.indexOf('area_record');
+    const imagesIndex = header.indexOf('images');
 
     // Parse data rows
     for (let i = 1; i < lines.length; i++) {
@@ -83,7 +85,8 @@ export function parseCSV(csvContent: string): CSVParseResult {
       data.push({
         plot_id: plotId,
         owner_name: ownerName,
-        area_record: areaRecord
+        area_record: areaRecord,
+        images: imagesIndex !== -1 ? values[imagesIndex] : undefined
       });
     }
 

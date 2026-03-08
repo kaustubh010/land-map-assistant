@@ -7,6 +7,10 @@ export interface LandRecord {
   plot_id: string;
   owner_name: string;
   area_record: number; // in hectares
+  north?: number;
+  south?: number;
+  east?: number;
+  west?: number;
 }
 
 export const landRecords: LandRecord[] = [

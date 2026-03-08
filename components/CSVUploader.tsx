@@ -21,6 +21,9 @@ export function CSVUploader({ onUploadSuccess }: CSVUploaderProps) {
   const { user } = useAuth();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const [selectedCsv, setSelectedCsv] = useState<File | null>(null);
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
 
   // ================= LOGIN GATE =================
   if (!user) {
@@ -49,17 +52,32 @@ export function CSVUploader({ onUploadSuccess }: CSVUploaderProps) {
 
   // ================= FILE HANDLING =================
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCsvChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      handleFile(e.target.files[0]);
+      const file = e.target.files[0];
+      if (!file.name.endsWith(".csv")) {
+        setUploadStatus({
+          type: "error",
+          message: "Please upload a CSV file only."
+        });
+        return;
+      }
+      setSelectedCsv(file);
+      setUploadStatus({ type: null, message: "" });
     }
   };
 
-  const handleFile = async (file: File) => {
-    if (!file.name.endsWith(".csv")) {
+  const handleImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setSelectedImages(Array.from(e.target.files));
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!selectedCsv && selectedImages.length === 0) {
       setUploadStatus({
         type: "error",
-        message: "Please upload a CSV file only."
+        message: "Please select a CSV file or images to process."
       });
       return;
     }
@@ -69,7 +87,13 @@ export function CSVUploader({ onUploadSuccess }: CSVUploaderProps) {
 
     try {
       const formData = new FormData();
-      formData.append("file", file);
+      if (selectedCsv) {
+        formData.append("file", selectedCsv);
+      }
+      
+      selectedImages.forEach(image => {
+        formData.append("images", image);
+      });
 
       const response = await fetch("/api/parcels/upload", {
         method: "POST",
@@ -86,23 +110,21 @@ export function CSVUploader({ onUploadSuccess }: CSVUploaderProps) {
 
         toast({
           title: "Upload failed",
-          description: data.error || "CSV upload failed",
+          description: data.error || "Processing failed",
           variant: "destructive"
         });
       } else {
         setUploadStatus({
           type: "success",
-          message: `${data.count} parcels uploaded`
+          message: `${data.count} parcels processed`
         });
 
         toast({
-          title: "Upload successful",
-          description: `${data.count} parcels uploaded`
+          title: "Processing complete",
+          description: `${data.count} parcels ${selectedCsv ? 'uploaded' : 'extracted'} successfully`
         });
 
-        if (fileInputRef.current) fileInputRef.current.value = "";
-
-        onUploadSuccess?.();
+        if (onUploadSuccess) onUploadSuccess();
       }
     } catch {
       setUploadStatus({
@@ -117,6 +139,10 @@ export function CSVUploader({ onUploadSuccess }: CSVUploaderProps) {
       });
     } finally {
       setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      if (imageInputRef.current) imageInputRef.current.value = "";
+      setSelectedCsv(null);
+      setSelectedImages([]);
     }
   };
 
@@ -125,34 +151,49 @@ export function CSVUploader({ onUploadSuccess }: CSVUploaderProps) {
       <CardHeader className="pb-2">
         <CardTitle className="text-sm flex items-center gap-2">
           <Upload className="h-4 w-4" />
-          Upload CSV
+          Upload Data
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="space-y-2">
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".csv"
-          onChange={handleChange}
-          className="hidden"
-        />
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <label className="text-xs font-medium">1. Select CSV File (Optional)</label>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv"
+            onChange={handleCsvChange}
+            className="block w-full text-xs text-muted-foreground file:mr-4 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-xs font-medium">2. Select Document Images (Optional)</label>
+          <input
+            ref={imageInputRef}
+            type="file"
+            accept="image/*,.pdf"
+            multiple
+            onChange={handleImagesChange}
+            className="block w-full text-xs text-muted-foreground file:mr-4 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+          />
+        </div>
 
         <Button
           size="sm"
           className="w-full"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
+          onClick={handleUpload}
+          disabled={uploading || (!selectedCsv && selectedImages.length === 0)}
         >
           {uploading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Uploading
+              Processing (AI OCR)
             </>
           ) : (
             <>
               <Upload className="mr-2 h-4 w-4" />
-              Upload CSV
+              Upload & Process
             </>
           )}
         </Button>
@@ -167,9 +208,12 @@ export function CSVUploader({ onUploadSuccess }: CSVUploaderProps) {
           </Alert>
         )}
 
-        <p className="text-xs text-muted-foreground">
-          Required: plot_id, owner_name, area_record
-        </p>
+        <div className="text-[10px] text-muted-foreground space-y-1 bg-muted/30 p-2 rounded">
+          <p className="font-semibold">Support:</p>
+          <p>• Upload CSV for bulk parcel metadata.</p>
+          <p>• Upload Images for automated AI extraction & History.</p>
+          <p>• Mix both: AI matches image data to CSV records.</p>
+        </div>
       </CardContent>
     </Card>
   );

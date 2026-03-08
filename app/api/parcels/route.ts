@@ -25,7 +25,11 @@ export async function GET(request: NextRequest) {
       id: p.id,
       plot_id: p.plotId,
       owner_name: p.ownerName,
-      area_record: p.areaRecord
+      area_record: p.areaRecord,
+      north: p.north,
+      south: p.south,
+      east: p.east,
+      west: p.west
     }));
 
     return NextResponse.json({
