@@ -1,4 +1,3 @@
-
 🗺️ Land Record Digitization Assistant
 ======================================
 
